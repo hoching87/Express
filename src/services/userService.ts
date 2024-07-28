@@ -15,7 +15,7 @@ interface myJWT extends JwtPayload {
 	iat: number;
 }
 
-const hashPassword = async (password: string) => {
+export const hashPassword = async (password: string) => {
 	let crypto;
 	try {
 		crypto = await import("node:crypto");
@@ -88,15 +88,14 @@ export const login = async (details: IUser) => {
 
 	// JWT
 	const secret = process.env.SECRET_KEY || "";
-	var token = sign(
-		{
-			id: user._id,
-			name: user.name,
-		},
-		secret
-	);
+	const userInfo = {
+		id: user._id,
+		name: user.name,
+	};
+	var token = sign(userInfo, secret);
 
 	return {
+		userDetails: userInfo,
 		token,
 	};
 };

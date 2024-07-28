@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import { createUser, login } from "../services/userService";
-import { listEvent, getEvent } from "../services/EventService";
+import { listEvent, getEvent } from "../services/eventService";
 const router = Router();
 
 router.post("/register", async (req: Request, res: Response) => {

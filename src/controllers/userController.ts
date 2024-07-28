@@ -5,7 +5,8 @@ import {
 	updateEvent,
 	listEvent,
 	deleteEvent,
-} from "../services/EventService";
+} from "../services/eventService";
+import { IEvent } from "../models/eventModel";
 
 const router = Router();
 
@@ -38,7 +39,10 @@ router.use(async (req: UserRequest, res: Response, next: NextFunction) => {
 });
 
 router.get("/events", async (req: UserRequest, res: Response) => {
-	const events = await listEvent(req.body.status, req.user?.id || "");
+	const events = await listEvent(
+		req.query.status as IEvent["status"],
+		req.user?.id || ""
+	);
 	res.json({ res: events });
 });
 
@@ -62,9 +66,17 @@ router.post("/event/update/:id", async (req: UserRequest, res: Response) => {
 router.post("/event/delete/:id", async (req: UserRequest, res: Response) => {
 	const eventID = req.params.id;
 
-	const event = await deleteEvent(req.user?.id || "", eventID);
+	const event = await deleteEvent(
+		req.user?.id || "",
+		req.body.password,
+		eventID
+	);
 
-	res.json({ res: event });
+	if (event.errros?.msg) {
+		res.status(400).json(event.errros);
+	} else {
+		res.json({ res: event });
+	}
 });
 
 export default router;

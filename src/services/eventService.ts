@@ -1,4 +1,6 @@
 import Event, { IEvent } from "../models/eventModel";
+import User from "../models/userModel";
+import { hashPassword } from "./userService";
 
 type TfieldErrors<T> = {
 	[P in keyof T]?: string;
@@ -37,7 +39,6 @@ export const updateEvent = async (
 		};
 	}
 	if (event.uid.toString() !== userID) {
-		console.log(userID, event.id);
 		return {
 			errros: {
 				status: 401,
@@ -53,7 +54,11 @@ export const updateEvent = async (
 	return event;
 };
 
-export const deleteEvent = async (userID: string, eventID: string) => {
+export const deleteEvent = async (
+	userID: string,
+	password: string,
+	eventID: string
+) => {
 	const event = await Event.findById(eventID);
 
 	if (!event) {
@@ -73,9 +78,21 @@ export const deleteEvent = async (userID: string, eventID: string) => {
 		};
 	}
 
+	const user = await User.findById(userID);
+	const hash = await hashPassword(password);
+
+	if (user?.password !== hash) {
+		return {
+			errros: {
+				status: 400,
+				msg: "Wrong Password!",
+			},
+		};
+	}
+
 	await event.deleteOne();
 
-	return event;
+	return {};
 };
 
 export const listEvent = async (status?: IEvent["status"], userID?: string) => {
